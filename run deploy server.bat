@@ -1,0 +1,1 @@
+mongoose-3.0.exe -r .\www,/img=.\resources\img,/lib=.\lib\deploy,/css=.\src\css,/js=.\src\js
