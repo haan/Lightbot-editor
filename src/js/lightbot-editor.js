@@ -1,6 +1,11 @@
 function LightBoxEditor(canvas) {
 
-    var IsometricProjection = {
+    var Projection = {
+        offsetX: 0,
+        offsetY: 0,
+        clientHeight: 0,
+        horizontalRotationAngle: 27,
+        verticalRotationAngle: 45,
         project: function(x, y, z) {
             /*
              Math: http://en.wikipedia.org/wiki/Isometric_projection#Overview
@@ -14,7 +19,11 @@ function LightBoxEditor(canvas) {
              Additional offset!
              Y Axis is inverted.
              */
-            return {'x': IsometricProjection.offsetX + 0.707 * x - 0.707 * z, 'y': IsometricProjection.clientHeight - (IsometricProjection.offsetY + 0.321 * x + 0.891 * y + 0.321 * z)};
+             //  (x cos(b)-z sin(b), x sin(a) sin(b)+z sin(a) cos(b)+y cos(a), x cos(a) sin(b)+z cos(a) cos(b)-y sin(a))
+             var b = this.verticalRotationAngle * Math.PI/180;
+             var a = this.horizontalRotationAngle * Math.PI/180;
+            return {'x': Projection.offsetX + x*Math.cos(b)-z*Math.sin(b), 'y': Projection.clientHeight - (Projection.offsetY + x*Math.sin(a)*Math.sin(b)+z*Math.sin(a)*Math.cos(b)+y*Math.cos(a))};
+            //return {'x': Projection.offsetX + 0.707 * x - 0.707 * z, 'y': Projection.clientHeight - (Projection.offsetY + 0.321 * x + 0.891 * y + 0.321 * z)};
         }
     };
 
@@ -83,10 +92,10 @@ function LightBoxEditor(canvas) {
             // front face: p1 is bottom left and rest is counter-clockwise;
             if (this.y == 0 || map.getHeight(this.x, this.y - 1) < this.height) {
                 ctx.fillStyle = colorFront;
-                var p1 = IsometricProjection.project(this.x * this.edgeLength, 0, this.y * this.edgeLength);
-                var p2 = IsometricProjection.project((this.x + 1) * this.edgeLength, 0, this.y * this.edgeLength);
-                var p3 = IsometricProjection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
-                var p4 = IsometricProjection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
+                var p1 = Projection.project(this.x * this.edgeLength, 0, this.y * this.edgeLength);
+                var p2 = Projection.project((this.x + 1) * this.edgeLength, 0, this.y * this.edgeLength);
+                var p3 = Projection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
+                var p4 = Projection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
@@ -102,10 +111,10 @@ function LightBoxEditor(canvas) {
             // left side face: p1 is bottom front and rest is counter-clockwise;
             if (this.x == 0 || map.getHeight(this.x - 1, this.y) < this.height) {
                 ctx.fillStyle = colorSide;
-                var p1 = IsometricProjection.project(this.x * this.edgeLength, 0, this.y * this.edgeLength);
-                var p2 = IsometricProjection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
-                var p3 = IsometricProjection.project(this.x * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
-                var p4 = IsometricProjection.project(this.x * this.edgeLength, 0, (this.y + 1) * this.edgeLength);
+                var p1 = Projection.project(this.x * this.edgeLength, 0, this.y * this.edgeLength);
+                var p2 = Projection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
+                var p3 = Projection.project(this.x * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
+                var p4 = Projection.project(this.x * this.edgeLength, 0, (this.y + 1) * this.edgeLength);
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
@@ -121,10 +130,10 @@ function LightBoxEditor(canvas) {
             // top face: p1 is front left and rest is counter-clockwise
             if (this.x == 0 || this.y == 0 || (map.getHeight(this.x - 1, this.y - 1) - this.height) < 2 * this.heightScale) { // difference of 1 is not enough to cover the block entirely
                 ctx.fillStyle = colorTop;
-                var p1 = IsometricProjection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
-                var p2 = IsometricProjection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
-                var p3 = IsometricProjection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
-                var p4 = IsometricProjection.project(this.x * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
+                var p1 = Projection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
+                var p2 = Projection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
+                var p3 = Projection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
+                var p4 = Projection.project(this.x * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
@@ -192,10 +201,10 @@ function LightBoxEditor(canvas) {
         this.drawTopFace = function() {
             // top face: p1 is front left and rest is counter-clockwise
             ctx.fillStyle = lightOn ? colorTopLightOn : colorTopLightOff;
-            var p1 = IsometricProjection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
-            var p2 = IsometricProjection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
-            var p3 = IsometricProjection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
-            var p4 = IsometricProjection.project(this.x * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
+            var p1 = Projection.project(this.x * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
+            var p2 = Projection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, this.y * this.edgeLength);
+            var p3 = Projection.project((this.x + 1) * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
+            var p4 = Projection.project(this.x * this.edgeLength, this.height * this.edgeLength, (this.y + 1) * this.edgeLength);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -208,10 +217,10 @@ function LightBoxEditor(canvas) {
             // top face overlay: p1 is front left and rest is counter-clockwise
             var overlayOffset = (1 - (currentAnimationFrame / animationFrames)) * ((1 - pulseSize) * this.getEdgeLength() / 2);
             ctx.fillStyle = lightOn ? colorTopLightOnOverlay : colorTopLightOffOverlay;
-            p1 = IsometricProjection.project(this.x * this.edgeLength + overlayOffset, this.height * this.edgeLength, this.y * this.edgeLength + overlayOffset);
-            p2 = IsometricProjection.project((this.x + 1) * this.edgeLength - overlayOffset, this.height * this.edgeLength, this.y * this.edgeLength + overlayOffset);
-            p3 = IsometricProjection.project((this.x + 1) * this.edgeLength - overlayOffset, this.height * this.edgeLength, (this.y + 1) * this.edgeLength - overlayOffset);
-            p4 = IsometricProjection.project(this.x * this.edgeLength + overlayOffset, this.height * this.edgeLength, (this.y + 1) * this.edgeLength - overlayOffset);
+            p1 = Projection.project(this.x * this.edgeLength + overlayOffset, this.height * this.edgeLength, this.y * this.edgeLength + overlayOffset);
+            p2 = Projection.project((this.x + 1) * this.edgeLength - overlayOffset, this.height * this.edgeLength, this.y * this.edgeLength + overlayOffset);
+            p3 = Projection.project((this.x + 1) * this.edgeLength - overlayOffset, this.height * this.edgeLength, (this.y + 1) * this.edgeLength - overlayOffset);
+            p4 = Projection.project(this.x * this.edgeLength + overlayOffset, this.height * this.edgeLength, (this.y + 1) * this.edgeLength - overlayOffset);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
@@ -364,9 +373,9 @@ function LightBoxEditor(canvas) {
     var ctx = canvas.get(0).getContext('2d');
 
     // isometric projection
-    IsometricProjection.offsetX = canvas.get(0).width / 2; // jquery width() returns 0 since canvas is hidden
-    IsometricProjection.offsetY = 50;
-    IsometricProjection.clientHeight = canvas.get(0).height;
+    Projection.offsetX = canvas.get(0).width / 2; // jquery width() returns 0 since canvas is hidden
+    Projection.offsetY = 50;
+    Projection.clientHeight = canvas.get(0).height;
 
     // refresh rate and rendering loop
     var fps = 30;
@@ -388,6 +397,10 @@ function LightBoxEditor(canvas) {
 
         // create map
         map = new Map();
+
+        if (!fpsTimer) {
+            fpsTimer = setInterval($.proxy(this.draw, this), fpsDelay);
+        }
     };
 
     this.reset = function() {
@@ -398,15 +411,22 @@ function LightBoxEditor(canvas) {
     };
 
     this.loadMap = function () {
-        map.loadMap();
+      map.loadMap();
     };
 
     this.draw = function() {
-        // draw the map and bot
-        map.draw();
+      //clear main canvas
+      ctx.clearRect(0,0, canvas.width(), canvas.height());
+
+      // draw the map and bot
+      map.draw();
     };
 
     this.getMap = function() {
         return map;
     };
+
+    this.getProjection = function() {
+        return Projection;
+    }
 };
