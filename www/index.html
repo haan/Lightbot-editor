@@ -1,86 +1,84 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>LightBot Editor v0.1</title>
-    <link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link type="text/css" href="lib/smoothness/jquery-ui-1.8.16.custom.css" rel="stylesheet"/>
-    <link type="text/css" href="css/lightbot.css" rel="stylesheet"/>
-    <script type="text/javascript" src="lib/jquery-1.6.4.js"></script>
-    <script type="text/javascript" src="lib/jquery-ui-1.8.16.custom.js"></script>
-    <script type="text/javascript" src="js/lightbot-editor.js"></script>
+    <head>
+        <title>LightBot Editor v0.1</title>
+        <link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+        <link type="text/css" href="lib/smoothness/jquery-ui-1.8.16.custom.css" rel="stylesheet"/>
+        <link type="text/css" href="css/lightbot.css" rel="stylesheet"/>
+        <script type="text/javascript" src="lib/jquery-1.6.4.js"></script>
+        <script type="text/javascript" src="lib/jquery-ui-1.8.16.custom.js"></script>
+        <script type="text/javascript" src="js/new_lightbot_editor.js"></script>
 
-    <script type="text/javascript">
-        $(document).ready(function() {
+        <script type="text/javascript">
+            $(document).ready(function() {
 
-//            // dialogs
-//            $("#mapDialog").dialog({
-//                draggable: false,
-//                autoOpen: false,
-//                modal: true,
-//                width: 400,
-//                height: 200,
-//                stack: false,
-//                resizable: false,
-//                close: function() {
-//                },
-//                buttons: {
-//                    Ok: function() {
-//                        $(this).dialog("close");
-//                    }
-//                }
-//            });
+    //            // dialogs
+    //            $("#mapDialog").dialog({
+    //                draggable: false,
+    //                autoOpen: false,
+    //                modal: true,
+    //                width: 400,
+    //                height: 200,
+    //                stack: false,
+    //                resizable: false,
+    //                close: function() {
+    //                },
+    //                buttons: {
+    //                    Ok: function() {
+    //                        $(this).dialog("close");
+    //                    }
+    //                }
+    //            });
 
 
-            var lightbot_editor = new LightBoxEditor($("#gameCanvas"));
-            lightbot_editor.init();
-            lightbot_editor.reset();
-            lightbot_editor.loadMap();
-            lightbot_editor.draw();
+                var lightbot_editor = new lightbot.LightBotEditor($("#gameCanvas"));
+                lightbot_editor.start();
 
-            $("#enter_map_button").click(function() {
-                console.log("yoohoo");
+                $("#enter_map_button").click(function() {
+                    console.log("yoohoo");
+                    lightbot_editor.rotateLeft();
+                });
+
+                $("#view_map_button").click(function() {
+                    console.log("yoohoo");
+                    lightbot_editor.rotateRight();
+                });
             });
-        });
-    </script>
-</head>
-<body>
-<div id="lightbot_editor">
+        </script>
+    </head>
+    <body>
+        <div id="lightbot_editor">
+            <div id="credits">Original concept by <a href="http://coolio-niato.newgrounds.com/" target="_blank">coolio niato</a>.
+                Development by <a href="http://www.haan.lu" target="_blank">Laurent Haan</a>. Sprite by <a
+                        href="http://www.pixeljoint.com/forum/member_profile.asp?PF=2146">surt</a>. Interface by <a
+                        href="http://zenobiahoman.daportfolio.com/">Zenobia Homan</a>. Music by <a
+                        href="http://hektikmusic.newgrounds.com/" target="_blank">hektikmusic</a>.
+            </div>
 
-    <div id="credits">Original concept by <a href="http://coolio-niato.newgrounds.com/" target="_blank">coolio niato</a>.
-        Development by <a href="http://www.haan.lu" target="_blank">Laurent Haan</a>. Sprite by <a
-                href="http://www.pixeljoint.com/forum/member_profile.asp?PF=2146">surt</a>. Interface by <a
-                href="http://zenobiahoman.daportfolio.com/">Zenobia Homan</a>. Music by <a
-                href="http://hektikmusic.newgrounds.com/" target="_blank">hektikmusic</a>.
-    </div>
+            <div id="editorScreen" class="ui-screen">
+                <div id="canvasContainer">
+                    <canvas id="gameCanvas" width="690" height="655" />
+                </div>
+                <div id="buttonContainer">
+                    <button id="enter_map_button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" role="button" aria-disabled="false">
+                        <span class="ui-button-icon-primary ui-icon ui-icon-folder-open"></span><span class="ui-button-text">Enter Map</span>
+                    </button>
 
-    <div id="editorScreen" class="ui-screen">
-        <div id="canvasContainer">
-            <canvas id="gameCanvas" width="690" height="655" />
+                    <button id="view_map_button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" role="button" aria-disabled="false">
+                        <span class="ui-button-icon-primary ui-icon ui-icon-disk"></span><span class="ui-button-text">View Map Data</span>
+                    </button>
+                </div>
+                <div id="instructionsContainer">
+                    <h1 class="ui-widget-header">Map Settings</h1>
+                </div>
+            </div>
+
+            <!--<div id="mapDialog" title="Map data!">-->
+                <!--<p>-->
+                    <!--<span class="achievement" style="float:left; margin:0 7px 50px 0;"></span>-->
+                    <!--<span class="message"></span>-->
+                <!--</p>-->
+            <!--</div>-->
         </div>
-        <div id="buttonContainer">
-            <button id="enter_map_button"
-                    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" role="button"
-                    aria-disabled="false">
-                <span class="ui-button-icon-primary ui-icon ui-icon-folder-open"></span><span class="ui-button-text">Enter Map</span>
-            </button>
-
-            <button id="view_map_button"
-                    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" role="button"
-                    aria-disabled="false">
-                <span class="ui-button-icon-primary ui-icon ui-icon-disk"></span><span class="ui-button-text">View Map Data</span>
-            </button>
-        </div>
-        <div id="instructionsContainer">
-            <h1 class="ui-widget-header">Map Settings</h1>
-        </div>
-    </div>
-
-    <!--<div id="mapDialog" title="Map data!">-->
-        <!--<p>-->
-            <!--<span class="achievement" style="float:left; margin:0 7px 50px 0;"></span>-->
-            <!--<span class="message"></span>-->
-        <!--</p>-->
-    <!--</div>-->
-</div>
-</body>
+    </body>
 </html>
