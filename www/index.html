@@ -31,6 +31,7 @@
     //            });
 
 
+
                 var lightbot_editor = new lightbot.LightBotEditor($("#gameCanvas"));
                 lightbot_editor.start();
 
@@ -42,6 +43,26 @@
                 $("#view_map_button").click(function() {
                     console.log("yoohoo");
                     lightbot_editor.rotateRight();
+                });
+
+                 $('#horizontal_rotation_inc').click(function(){
+                  lightbot.IsometricProjection.horizontalRotationAngle -= 5;
+                     lightbot_editor.redraw();
+                });
+
+                $('#horizontal_rotation_dec').click(function(){
+                  lightbot.IsometricProjection.horizontalRotationAngle += 5;
+                    lightbot_editor.redraw();
+                });
+
+                $('#vertical_rotation_inc').click(function(){
+                  lightbot.IsometricProjection.verticalRotationAngle += 5;
+                    lightbot_editor.redraw();
+                });
+
+                $('#vertical_rotation_dec').click(function(){
+                  lightbot.IsometricProjection.verticalRotationAngle -= 5;
+                    lightbot_editor.redraw();
                 });
             });
         </script>
@@ -67,18 +88,27 @@
                     <button id="view_map_button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" role="button" aria-disabled="false">
                         <span class="ui-button-icon-primary ui-icon ui-icon-disk"></span><span class="ui-button-text">View Map Data</span>
                     </button>
+                    <button id="horizontal_rotation_inc" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">
+                      <span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-n"></span>
+                      <span class="ui-button-text">Increase rotation around horizontal axis</span>
+                    </button>
+                    <button id="horizontal_rotation_dec" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">
+                      <span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s"></span>
+                      <span class="ui-button-text">Increase rotation around horizontal axis</span>
+                    </button>
+                    <button id="vertical_rotation_inc" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">
+                      <span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-w"></span>
+                      <span class="ui-button-text">Increase rotation around vertical axis</span>
+                    </button>
+                    <button id="vertical_rotation_dec" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">
+                      <span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-e"></span>
+                      <span class="ui-button-text">Decrease rotation around vertical axis</span>
+                    </button>
                 </div>
                 <div id="instructionsContainer">
                     <h1 class="ui-widget-header">Map Settings</h1>
                 </div>
             </div>
-
-            <!--<div id="mapDialog" title="Map data!">-->
-                <!--<p>-->
-                    <!--<span class="achievement" style="float:left; margin:0 7px 50px 0;"></span>-->
-                    <!--<span class="message"></span>-->
-                <!--</p>-->
-            <!--</div>-->
         </div>
     </body>
 </html>

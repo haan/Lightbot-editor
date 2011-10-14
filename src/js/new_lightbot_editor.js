@@ -34,6 +34,10 @@ var lightbot = (function() {
       that.map.draw(ctx)
     };
 
+    that.redraw = function() {
+      that.map.draw(ctx);
+    };
+
     that.rotateLeft = function() {
       that.map.rotateLeft();
       that.map.draw(ctx);
@@ -51,6 +55,8 @@ var lightbot = (function() {
 (function() {
   lightbot.IsometricProjection = {
     offsetY: 50,
+    horizontalRotationAngle: 27,
+    verticalRotationAngle: 45,
     project: function(x, y, z) {
       /*
        Math: http://en.wikipedia.org/wiki/Isometric_projection#Overview
@@ -64,7 +70,11 @@ var lightbot = (function() {
        Additional offset!
        Y Axis is inverted.
        */
-      return {'x': this.offsetX + 0.707 * x - 0.707 * z, 'y': this.clientHeight - (this.offsetY + 0.321 * x + 0.891 * y + 0.321 * z)};
+
+      var b = this.verticalRotationAngle * Math.PI/180;
+      var a = this.horizontalRotationAngle * Math.PI/180;
+      return {'x': this.offsetX + x*Math.cos(b)-z*Math.sin(b), 'y': this.clientHeight - (this.offsetY + x*Math.sin(a)*Math.sin(b)+z*Math.sin(a)*Math.cos(b)+y*Math.cos(a))};
+//      return {'x': this.offsetX + 0.707 * x - 0.707 * z, 'y': this.clientHeight - (this.offsetY + 0.321 * x + 0.891 * y + 0.321 * z)};
     }
   };
 }());
@@ -259,7 +269,6 @@ var lightbot = (function() {
     };
 
     function getHeight(x, y) {
-      console.log(x + " - " + y);
       return mapHeight(mapData[x][y]);
     }
 
@@ -296,3 +305,32 @@ var lightbot = (function() {
 
 
 
+
+
+
+var Projection = {
+        offsetX: 0,
+        offsetY: 0,
+        clientHeight: 0,
+        horizontalRotationAngle: 27,
+        verticalRotationAngle: 45,
+        project: function(x, y, z) {
+            /*
+             Math: http://en.wikipedia.org/wiki/Isometric_projection#Overview
+             More Theoiry: http://www.compuphase.com/axometr.htm
+             Angles used: vertical rotation=45°, horizontal rotation=arctan(0,5)
+             projection matrix:
+             | 0,707  0     -0,707 |
+             | 0,321  0,891  0,321 |
+             | 0,630 -0,453  0,630 |
+
+             Additional offset!
+             Y Axis is inverted.
+             */
+             //  (x cos(b)-z sin(b), x sin(a) sin(b)+z sin(a) cos(b)+y cos(a), x cos(a) sin(b)+z cos(a) cos(b)-y sin(a))
+             var b = this.verticalRotationAngle * Math.PI/180;
+             var a = this.horizontalRotationAngle * Math.PI/180;
+            return {'x': Projection.offsetX + x*Math.cos(b)-z*Math.sin(b), 'y': Projection.clientHeight - (Projection.offsetY + x*Math.sin(a)*Math.sin(b)+z*Math.sin(a)*Math.cos(b)+y*Math.cos(a))};
+            //return {'x': Projection.offsetX + 0.707 * x - 0.707 * z, 'y': Projection.clientHeight - (Projection.offsetY + 0.321 * x + 0.891 * y + 0.321 * z)};
+        }
+    };
