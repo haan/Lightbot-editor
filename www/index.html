@@ -7,42 +7,41 @@
         <link type="text/css" href="css/lightbot.css" rel="stylesheet"/>
         <script type="text/javascript" src="lib/jquery-1.6.4.js"></script>
         <script type="text/javascript" src="lib/jquery-ui-1.8.16.custom.js"></script>
+        <script type="text/javascript" src="lib/underscore.js"></script>
         <script type="text/javascript" src="js/new_lightbot_editor.js"></script>
 
         <script type="text/javascript">
             $(document).ready(function() {
-
-    //            // dialogs
-    //            $("#mapDialog").dialog({
-    //                draggable: false,
-    //                autoOpen: false,
-    //                modal: true,
-    //                width: 400,
-    //                height: 200,
-    //                stack: false,
-    //                resizable: false,
-    //                close: function() {
-    //                },
-    //                buttons: {
-    //                    Ok: function() {
-    //                        $(this).dialog("close");
-    //                    }
-    //                }
-    //            });
-
-
-
                 var lightbot_editor = new lightbot.LightBotEditor($("#gameCanvas"));
                 lightbot_editor.start();
 
-                $("#enter_map_button").click(function() {
-                    console.log("yoohoo");
+                $("#rotate-left").click(function() {
                     lightbot_editor.rotateLeft();
                 });
 
-                $("#view_map_button").click(function() {
-                    console.log("yoohoo");
+                $("#rotate-right").click(function() {
                     lightbot_editor.rotateRight();
+                });
+
+                $("#increase-height").click(function() {
+                    lightbot_editor.incHeight();
+                });
+
+                $("#decrease-height").click(function() {
+                    lightbot_editor.decHeight();
+                });
+
+                $("#width-slider").slider({
+                    min: 5,
+                    max: 30,
+                    value: 6
+                });
+
+                $("#height-slider").slider({
+                    min: 5,
+                    max: 30,
+                    value: 6,
+                    orientation: "vertical"
                 });
 
                  $('#horizontal_rotation_inc').click(function(){
@@ -107,6 +106,18 @@
                 </div>
                 <div id="instructionsContainer">
                     <h1 class="ui-widget-header">Map Settings</h1>
+                    <div>
+                        <img id="rotate-left" src="img/rotate-left.png" alt="rotate map left"/>
+                        <img id="rotate-right" src="img/rotate-right.png" alt="rotate map right" style="float:right" />
+                    </div>
+                    <div>
+                        <div id="width-slider"></div>
+                        <div id="height-slider"></div>
+                    </div>
+                    <div>
+                        <img id="increase-height" src="img/up-level.png" alt="rotate map left"/>
+                        <img id="decrease-height" src="img/down-level.png" alt="rotate map right" />
+                    </div>
                 </div>
             </div>
         </div>

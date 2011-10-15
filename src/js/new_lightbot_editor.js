@@ -9,11 +9,11 @@ var lightbot = (function() {
       "posX": 0,
       "posY": 0,
       "map": [
-        ["1l", "1l", "1b", "1b", "1b", "1b", "1b", "1b"],
-        ["1b", "2b", "2b", "1b", "1b", "1b", "1b", "1b"],
-        ["1b", "1b", "3l", "1b", "1b", "1b", "1b", "1b"],
-        ["1b", "1b", "2b", "1b", "1b", "1b", "1b", "1b"],
-        ["1b", "1b", "1b", "1b", "1b", "1b", "1b", "1b"]
+        ["1l", "1l", "1b", "1b", "1b", "1b"],
+        ["1b", "2b", "2b", "1b", "1b", "2b"],
+        ["1b", "1b", "3l", "1b", "1b", "3b"],
+        ["1b", "1b", "2b", "1b", "1b", "2b"],
+        ["1b", "1b", "1b", "1b", "1b", "1b"]
       ],
       "medals": {
         "gold": 3,
@@ -24,6 +24,7 @@ var lightbot = (function() {
 
     var that = {};
     var ctx = canvas.get(0).getContext('2d');
+    var selection = lightbot.selection();
 
     that.start = function() {
       console.log("start");
@@ -31,25 +32,90 @@ var lightbot = (function() {
       lightbot.IsometricProjection.clientHeight = canvas.get(0).height;
       that.map = lightbot.Map();
       that.map.loadMap(defaultMapData);
-      that.map.draw(ctx)
+      that.map.draw(ctx, selection);
     };
 
     that.redraw = function() {
-      that.map.draw(ctx);
+      that.map.draw(ctx, selection);
     };
 
     that.rotateLeft = function() {
       that.map.rotateLeft();
-      that.map.draw(ctx);
+      selection.clearSelection();
+      that.map.draw(ctx, selection);
     };
 
     that.rotateRight = function() {
       that.map.rotateRight();
-      that.map.draw(ctx);
+      selection.clearSelection();
+      that.map.draw(ctx, selection);
     };
+
+    that.incHeight = function() {
+      that.map.incHeight(selection);
+      that.map.draw(ctx, selection);
+    };
+
+    that.decHeight = function() {
+      that.map.decHeight(selection);
+      that.map.draw(ctx, selection);
+    };
+
+    function convertToMapCoordinates(mouseX, mouseY) {
+      mouseX = mouseX - canvas.offset().left;
+      mouseY = mouseY - canvas.offset().top;
+      var clientHeight = lightbot.IsometricProjection.clientHeight;
+      var offsetX = lightbot.IsometricProjection.offsetX;
+      var offsetY = lightbot.IsometricProjection.offsetY;
+      var height = 25;
+
+      var x = ((mouseX - offsetX) / 0.707 + (clientHeight - mouseY - offsetY - 0.891*height) / 0.321) / 2;
+      var z = (clientHeight - mouseY - offsetY - 0.891*height) / 0.321 - x;
+
+      x = Math.floor(x / 50);
+      z = Math.floor(z / 50);
+
+      return {x: x, y: z};
+    }
+
+    canvas.bind('mouseup', function(e) {
+      var point = convertToMapCoordinates(e.clientX, e.clientY);
+      selection.clearSelection();
+      selection.addToSelection(point.x, point.y);
+      that.map.draw(ctx, selection);
+    });
 
     return that;
   };
+}());
+
+(function() {
+  lightbot.selection = function() {
+    var selected_cells = [];
+    var that = {};
+
+    that.isCellSelected = function(x, y) {
+      return _.any(selected_cells, function(cell) {
+        return cell.x == x && cell.y == y;
+      });
+    };
+
+    that.getSelectedCells = function() {
+      return selected_cells;
+    };
+
+    that.clearSelection = function() {
+      selected_cells = [];
+    };
+
+    that.addToSelection = function(x, y) {
+      if (!that.isCellSelected(x, y)) {
+        selected_cells.push({x: x, y: y});
+      }
+    };
+
+    return that;
+  }
 }());
 
 (function() {
@@ -92,6 +158,7 @@ var lightbot = (function() {
     var colorFront = "#adb8bd"; // "#e28b00"; // color of front facet
     var colorSide = "#e5f0f5"; // "#ffc133"; // color of side facet
     var strokeColor = "#485256"; // color of the stroke
+    var selectedColor = "#ff0000";
     var strokeWidth = 0.5; // width of the stroke
 
     that.drawFrontFace = function(height, x, y, ctx) {
@@ -128,8 +195,13 @@ var lightbot = (function() {
       ctx.stroke();
     };
 
-    that.drawTopFace = function(height, x, y, ctx) {
+    that.drawTopFace = function(height, x, y, ctx, selection) {
       // top face: p1 is front left and rest is counter-clockwise
+      if (selection.isCellSelected(x, y)) {
+        ctx.strokeStyle = selectedColor;
+        ctx.lineWidth = 1.5;
+      }
+
       ctx.fillStyle = colorTop;
       var p1 = lightbot.IsometricProjection.project(x * that.edgeLength, height * that.edgeLength, y * that.edgeLength);
       var p2 = lightbot.IsometricProjection.project((x + 1) * that.edgeLength, height * that.edgeLength, y * that.edgeLength);
@@ -145,14 +217,14 @@ var lightbot = (function() {
       ctx.stroke();
     };
 
-    that.draw = function(height, x, y, ctx) {
+    that.draw = function(height, x, y, ctx, selection) {
       ctx.strokeStyle = strokeColor;
       ctx.lineWidth = strokeWidth;
       height = height * that.heightScale;
 
       that.drawFrontFace(height, x, y, ctx);
       that.drawSideFace(height, x, y, ctx);
-      that.drawTopFace(height, x, y, ctx);
+      that.drawTopFace(height, x, y, ctx, selection);
     };
 
     return that;
@@ -166,9 +238,15 @@ var lightbot = (function() {
     // visual values
     var colorTopLightOff = "#0468fb";
     var colorTopLightOffOverlay = "#4c81ff";
+    var selectedColor = "#ff0000";
 
     // overwrite default Box method
-    that.drawTopFace = function(height, x, y, ctx) {
+    that.drawTopFace = function(height, x, y, ctx, selection) {
+      if (selection.isCellSelected(x, y)) {
+        ctx.strokeStyle = selectedColor;
+        ctx.lineWidth = 1.5;
+      }
+
       // top face: p1 is front left and rest is counter-clockwise
       ctx.fillStyle = colorTopLightOff;
       var p1 = lightbot.IsometricProjection.project(x * that.edgeLength, height * that.edgeLength, y * that.edgeLength);
@@ -183,6 +261,8 @@ var lightbot = (function() {
       ctx.lineTo(p1.x, p1.y);
       ctx.fill();
       ctx.stroke();
+
+//      ctx.strokeStyle = strokeColor;
 
       // top face overlay: p1 is front left and rest is counter-clockwise
       var overlayOffset = 0.5 * that.edgeLength / 2;
@@ -210,10 +290,6 @@ var lightbot = (function() {
     var levelSize = {}; // the level size
     var mapRef = []; // the actual map values
     var mapData = [];
-
-    function mapHeight(cell) {
-      return parseInt(cell.charAt(0));
-    }
 
     function rotateArrayRight(data) {
       var w = data.length;
@@ -269,8 +345,14 @@ var lightbot = (function() {
     };
 
     function getHeight(x, y) {
-      return mapHeight(mapData[x][y]);
+      return parseInt(mapData[x][y].charAt(0));
     }
+
+    function setHeight(x, y, height) {
+      mapData[x][y] = height + mapData[x][y].charAt(1);
+    }
+
+//    function
 
     that.rotateLeft = function() {
       that.rotateRight();
@@ -287,50 +369,44 @@ var lightbot = (function() {
       mapData = rotateArrayRight(mapData);
     };
 
-    that.draw = function(ctx) {
+    that.draw = function(ctx, selection) {
       ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
 
       // order is important for occlusion
       for (var i = levelSize.x - 1; i >= 0; i--) {
         for (var j = levelSize.y - 1; j >= 0; j--) {
           // draw the tile
-          mapRef[i][j].draw(getHeight(i, j), i, j, ctx);
+          mapRef[i][j].draw(getHeight(i, j), i, j, ctx, selection);
         }
       }
+    };
+
+    that.getMapSize = function() {
+      return levelSize;
+    };
+
+    that.incHeight = function(selection) {
+      _.each(selection.getSelectedCells(), function(cell) {
+        var height = getHeight(cell.x, cell.y);
+        if (height < 9) {
+          height++;
+        }
+
+        setHeight(cell.x, cell.y, height);
+      });
+    };
+
+    that.decHeight = function(selection) {
+       _.each(selection.getSelectedCells(), function(cell) {
+        var height = getHeight(cell.x, cell.y);
+        if (height > 1) {
+          height--;
+        }
+
+        setHeight(cell.x, cell.y, height);
+      });
     };
 
     return that;
   }
 }());
-
-
-
-
-
-
-var Projection = {
-        offsetX: 0,
-        offsetY: 0,
-        clientHeight: 0,
-        horizontalRotationAngle: 27,
-        verticalRotationAngle: 45,
-        project: function(x, y, z) {
-            /*
-             Math: http://en.wikipedia.org/wiki/Isometric_projection#Overview
-             More Theoiry: http://www.compuphase.com/axometr.htm
-             Angles used: vertical rotation=45°, horizontal rotation=arctan(0,5)
-             projection matrix:
-             | 0,707  0     -0,707 |
-             | 0,321  0,891  0,321 |
-             | 0,630 -0,453  0,630 |
-
-             Additional offset!
-             Y Axis is inverted.
-             */
-             //  (x cos(b)-z sin(b), x sin(a) sin(b)+z sin(a) cos(b)+y cos(a), x cos(a) sin(b)+z cos(a) cos(b)-y sin(a))
-             var b = this.verticalRotationAngle * Math.PI/180;
-             var a = this.horizontalRotationAngle * Math.PI/180;
-            return {'x': Projection.offsetX + x*Math.cos(b)-z*Math.sin(b), 'y': Projection.clientHeight - (Projection.offsetY + x*Math.sin(a)*Math.sin(b)+z*Math.sin(a)*Math.cos(b)+y*Math.cos(a))};
-            //return {'x': Projection.offsetX + 0.707 * x - 0.707 * z, 'y': Projection.clientHeight - (Projection.offsetY + 0.321 * x + 0.891 * y + 0.321 * z)};
-        }
-    };
