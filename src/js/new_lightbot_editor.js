@@ -25,6 +25,7 @@ var lightbot = (function() {
     var that = {};
     var ctx = canvas.get(0).getContext('2d');
     var selection = lightbot.selection();
+    var selection_start = null;
 
     that.start = function() {
       console.log("start");
@@ -90,10 +91,34 @@ var lightbot = (function() {
       return {x: x, y: z};
     }
 
+    function isOnMap(point) {
+      return point.x >= 0 && point.y >= 0 && point.x < that.map.getMapSize().x && point.y < that.map.getMapSize().y;
+    }
+
+    canvas.bind('mousedown', function(e) {
+      var point = convertToMapCoordinates(e.clientX, e.clientY);
+      if (isOnMap(point)) {
+        selection_start = point;
+      }
+    });
+
     canvas.bind('mouseup', function(e) {
       var point = convertToMapCoordinates(e.clientX, e.clientY);
       selection.clearSelection();
-      selection.addToSelection(point.x, point.y);
+      if (selection_start == null && isOnMap(point)) {
+        selection.addToSelection(point.x, point.y);
+      } else if (isOnMap(point)) {
+        var x1 = Math.min(point.x, selection_start.x);
+        var x2 = Math.max(point.x, selection_start.x);
+        var y1 = Math.min(point.y, selection_start.y);
+        var y2 = Math.max(point.y, selection_start.y);
+
+        for (var i = x1; i <= x2; i++) {
+          for (var j = y1; j <= y2; j++) {
+            selection.addToSelection(i, j);
+          }
+        }
+      }
       that.map.draw(ctx, selection);
     });
 
