@@ -61,6 +61,18 @@ var lightbot = (function() {
       that.map.draw(ctx, selection);
     };
 
+    that.changeHeight = function(height) {
+      that.map.changeMapHeight(height);
+      selection.clearSelection();
+      that.map.draw(ctx, selection);
+    };
+
+    that.changeWidth = function(width) {
+      that.map.changeMapWidth(width);
+      selection.clearSelection();
+      that.map.draw(ctx, selection);
+    };
+
     function convertToMapCoordinates(mouseX, mouseY) {
       mouseX = mouseX - canvas.offset().left;
       mouseY = mouseY - canvas.offset().top;
@@ -309,6 +321,9 @@ var lightbot = (function() {
       return retData;
     }
 
+    var box = lightbot.Box();
+    var lightbox = lightbot.LightBox();
+
     that.loadMap = function(data) {
       mapData = data.map;
 
@@ -321,8 +336,7 @@ var lightbot = (function() {
         mapRef[i] = new Array(levelSize.y);
       }
 
-      var box = lightbot.Box();
-      var lightbox = lightbot.LightBox();
+
       for (i = 0; i < data.map.length; i++) {
         for (var j = 0; j < data.map[i].length; j++) {
           switch (data.map[i][j].charAt(1)) {
@@ -383,6 +397,41 @@ var lightbot = (function() {
 
     that.getMapSize = function() {
       return levelSize;
+    };
+
+    that.changeMapWidth = function(width) {
+      if (levelSize.x < width) {
+        for (var i = levelSize.x; i < width; i++) {
+          mapData[i] = [];
+          mapRef[i] = [];
+          for (var j = 0; j < levelSize.y; j++) {
+            mapData[i][j] = "1b";
+            mapRef[i][j] = box;
+          }
+        }
+      } else {
+        mapData = mapData.slice(0, width);
+        mapRef = mapRef.slice(0, width);
+      }
+
+      levelSize.x = width;
+    };
+
+    that.changeMapHeight = function(height) {
+      console.log("new height " + height);
+      for (var i = 0; i < levelSize.x; i++) {
+        if (levelSize.y < height) {
+          for (var j = levelSize.y; j < height; j++) {
+            mapData[i][j] = "1b";
+            mapRef[i][j] = box;
+          }
+        } else {
+          mapData[i] = mapData[i].slice(0, height);
+          mapRef[i] = mapRef[i].slice(0, height);
+        }
+      }
+
+      levelSize.y = height;
     };
 
     that.incHeight = function(selection) {
