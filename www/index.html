@@ -31,6 +31,10 @@
                     lightbot_editor.decHeight();
                 });
 
+                $("#toggle-light").click(function() {
+                    lightbot_editor.toggleLight();
+                });
+
                 $("#width-slider").slider({
                     min: 5,
                     max: 10,
@@ -117,12 +121,13 @@
                         <img id="rotate-right" src="img/rotate-right.png" alt="rotate map right" style="float:right" />
                     </div>
                     <div>
-                        <div id="width-slider"></div>
-                        <div id="height-slider"></div>
+                        <div id="width-slider" class="vslider"/>
                     </div>
                     <div>
                         <img id="increase-height" src="img/up-level.png" alt="rotate map left"/>
+                        <img id="toggle-light" src="img/light_bulb.png" alt="toggle light"/>
                         <img id="decrease-height" src="img/down-level.png" alt="rotate map right" />
+                        <div id="height-slider" class="hslider" />
                     </div>
                 </div>
             </div>

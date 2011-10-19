@@ -52,6 +52,12 @@ var lightbot = (function() {
       that.map.draw(ctx, selection);
     };
 
+    that.toggleLight = function() {
+      console.log("asdgasdg");
+      that.map.toggleLight(selection);
+      that.map.draw(ctx, selection);
+    };
+
     that.incHeight = function() {
       that.map.incHeight(selection);
       that.map.draw(ctx, selection);
@@ -361,7 +367,6 @@ var lightbot = (function() {
         mapRef[i] = new Array(levelSize.y);
       }
 
-
       for (i = 0; i < data.map.length; i++) {
         for (var j = 0; j < data.map[i].length; j++) {
           switch (data.map[i][j].charAt(1)) {
@@ -389,6 +394,19 @@ var lightbot = (function() {
 
     function setHeight(x, y, height) {
       mapData[x][y] = height + mapData[x][y].charAt(1);
+    }
+
+    function getType(x, y) {
+      return mapData[x][y].charAt(1);
+    }
+
+    function setType(x, y, type) {
+      mapData[x][y] = mapData[x][y].charAt(0) + type;
+      if (type === 'b') {
+        mapRef[x][y] = box;
+      } else if (type === 'l') {
+        mapRef[x][y] = lightbox;
+      }
     }
 
 //    function
@@ -478,6 +496,17 @@ var lightbot = (function() {
         }
 
         setHeight(cell.x, cell.y, height);
+      });
+    };
+
+    that.toggleLight = function(selection) {
+       _.each(selection.getSelectedCells(), function(cell) {
+        var type = getType(cell.x, cell.y);
+        if (type === 'l') {
+          setType(cell.x, cell.y, 'b');
+        } else {
+          setType(cell.x, cell.y, 'l');
+        }
       });
     };
 

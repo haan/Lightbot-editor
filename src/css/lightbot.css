@@ -86,3 +86,13 @@ a:hover {
   height: 690px;
   background-color: white;
 }
+
+.hslider {
+    float: right;
+    height: 150px;
+    margin:  10px;
+}
+
+.vslider {
+    margin:  10px;
+}
