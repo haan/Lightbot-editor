@@ -73,6 +73,48 @@
                   lightbot.IsometricProjection.verticalRotationAngle -= 5;
                     lightbot_editor.redraw();
                 });
+
+                $('#view_map_button').click(function(){
+                  $("#dialogMapData").val(lightbot_editor.retrieveMap());
+                  $("div#levelDisplay").dialog('open');
+                });
+
+                $('#enter_map_button').click(function(){
+                  $("#dialogInputData").val("");
+                  $("div#levelInput").dialog('open');
+                });
+
+                // dialogs
+                $("div#levelDisplay").dialog({
+                  autoOpen: false,
+                  modal: true,
+                  width: 410,
+                  height: 220,
+                  draggable: false,
+                  resizable: false,
+                  buttons: {
+                    Ok: function() {
+                      $(this).dialog("close");
+                    }
+                  }
+                });
+                $("div#levelInput").dialog({
+                  autoOpen: false,
+                  modal: true,
+                  width: 410,
+                  height: 220,
+                  draggable: false,
+                  resizable: false,
+                  buttons: {
+                    Ok: function() {
+                      $(this).dialog("close");
+                        lightbot_editor.loadNewMap($("#dialogInputData").val());
+                    },
+                    Cancel: function() {
+                      $(this).dialog("close");
+                    }
+                  }
+                });
             });
         </script>
     </head>
@@ -130,6 +172,16 @@
                         <div id="height-slider" class="hslider" />
                     </div>
                 </div>
+            </div>
+            <div id="levelDisplay" title="Map Data">
+              <div>
+                  <textarea id="dialogMapData" rows="8" cols="60"></textarea>
+              </div>
+            </div>
+            <div id="levelInput" title="Enter Map Data">
+              <div>
+                  <textarea id="dialogInputData" rows="8" cols="60"></textarea>
+              </div>
             </div>
         </div>
     </body>

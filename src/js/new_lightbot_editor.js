@@ -28,11 +28,16 @@ var lightbot = (function() {
     var selection_start = null;
 
     that.start = function() {
-      console.log("start");
       lightbot.IsometricProjection.offsetX = canvas.get(0).width / 2;
       lightbot.IsometricProjection.clientHeight = canvas.get(0).height;
       that.map = lightbot.Map();
       that.map.loadMap(defaultMapData);
+      that.map.draw(ctx, selection);
+    };
+
+    that.loadNewMap = function(mapData) {
+      selection.clearSelection();
+      that.map.loadMap(JSON.parse(mapData));
       that.map.draw(ctx, selection);
     };
 
@@ -53,7 +58,6 @@ var lightbot = (function() {
     };
 
     that.toggleLight = function() {
-      console.log("asdgasdg");
       that.map.toggleLight(selection);
       that.map.draw(ctx, selection);
     };
@@ -80,6 +84,21 @@ var lightbot = (function() {
       that.map.draw(ctx, selection);
     };
 
+    that.retrieveMap = function() {
+      var fullMap = {
+        "direction": 0,
+        "posX": 0,
+        "posY": 0,
+        "map": that.map.getMapData(),
+        "medals": {
+          "gold": 3,
+          "silver": 4,
+          "bronze": 5
+        }
+      };
+      return JSON.stringify(fullMap);
+    };
+
     function convertToMapCoordinates(mouseX, mouseY) {
       mouseX = mouseX - canvas.offset().left;
       mouseY = mouseY - canvas.offset().top;
@@ -88,8 +107,8 @@ var lightbot = (function() {
       var offsetY = lightbot.IsometricProjection.offsetY;
       var height = 25;
 
-      var x = ((mouseX - offsetX) / 0.707 + (clientHeight - mouseY - offsetY - 0.891*height) / 0.321) / 2;
-      var z = (clientHeight - mouseY - offsetY - 0.891*height) / 0.321 - x;
+      var x = ((mouseX - offsetX) / 0.707 + (clientHeight - mouseY - offsetY - 0.891 * height) / 0.321) / 2;
+      var z = (clientHeight - mouseY - offsetY - 0.891 * height) / 0.321 - x;
 
       x = Math.floor(x / 50);
       z = Math.floor(z / 50);
@@ -101,6 +120,19 @@ var lightbot = (function() {
       return point.x >= 0 && point.y >= 0 && point.x < that.map.getMapSize().x && point.y < that.map.getMapSize().y;
     }
 
+    function addToSelection(start, end) {
+      var x1 = Math.min(end.x, start.x);
+      var x2 = Math.max(end.x, start.x);
+      var y1 = Math.min(end.y, start.y);
+      var y2 = Math.max(end.y, start.y);
+
+      for (var i = x1; i <= x2; i++) {
+        for (var j = y1; j <= y2; j++) {
+          selection.addToSelection(i, j);
+        }
+      }
+    }
+
     canvas.bind('mousedown', function(e) {
       var point = convertToMapCoordinates(e.clientX, e.clientY);
       if (isOnMap(point)) {
@@ -108,22 +140,27 @@ var lightbot = (function() {
       }
     });
 
+    canvas.bind('mousemove', function(e) {
+      if (selection_start === null) return;
+
+      var point = convertToMapCoordinates(e.clientX, e.clientY);
+      selection.clearSelection();
+      if (isOnMap(point)) {
+        addToSelection(selection_start, point);
+      }
+
+      that.map.draw(ctx, selection);
+    });
+
     canvas.bind('mouseup', function(e) {
       var point = convertToMapCoordinates(e.clientX, e.clientY);
       selection.clearSelection();
-      if (selection_start == null && isOnMap(point)) {
+      if (selection_start === null && isOnMap(point)) {
         selection.addToSelection(point.x, point.y);
       } else if (isOnMap(point)) {
-        var x1 = Math.min(point.x, selection_start.x);
-        var x2 = Math.max(point.x, selection_start.x);
-        var y1 = Math.min(point.y, selection_start.y);
-        var y2 = Math.max(point.y, selection_start.y);
-
-        for (var i = x1; i <= x2; i++) {
-          for (var j = y1; j <= y2; j++) {
-            selection.addToSelection(i, j);
-          }
-        }
+        addToSelection(selection_start, point);
+        
+        selection_start = null;
       }
       that.map.draw(ctx, selection);
     });
@@ -384,8 +421,8 @@ var lightbot = (function() {
         }
       }
 
-      that.rotateRight();
-      that.rotateRight();
+//      that.rotateRight();
+//      that.rotateRight();
     };
 
     function getHeight(x, y) {
@@ -508,6 +545,10 @@ var lightbot = (function() {
           setType(cell.x, cell.y, 'l');
         }
       });
+    };
+
+    that.getMapData = function() {
+      return mapData;
     };
 
     return that;
