@@ -107,8 +107,38 @@ var lightbot = (function() {
       var offsetY = lightbot.IsometricProjection.offsetY;
       var height = 25;
 
-      var x = ((mouseX - offsetX) / 0.707 + (clientHeight - mouseY - offsetY - 0.891 * height) / 0.321) / 2;
-      var z = (clientHeight - mouseY - offsetY - 0.891 * height) / 0.321 - x;
+      var tmpX = mouseX - offsetX; // x coordinate in 3D map space
+      var tmpY = clientHeight - mouseY - offsetY; // y coordinate in 3D map space
+
+      /* 
+        Assuming a projection matrix with angles a and b, the projection is: http://www.wolframalpha.com/input/?i=%7B%7B1%2C0%2C0%7D%2C%7B0%2C+cos+a%2C+sin+a%7D%2C%7B0%2C+-sin+a%2C+cos+a%7D%7D*%7B%7Bcos+b%2C+0%2C+-sin+b%7D%2C%7B0%2C1%2C0%7D%2C%7Bsin+b%2C+0%2C+cos+b%7D%7D*%7Bx%2Cy%2C+z%7D
+        By setting y to the minimum height of a box (which is box.edgeLength * box.heightScale), we obtain the following system of equations with Cx and Cy the 2D coords and Ax, Ay, Az the 3D coords:
+
+        Cx = Ax * cos(b) - Az * sin(b)
+        Cy = Ax * sin(a) * sin(b) + Az * sin(a) * cos(b) + Ay * cos(a)
+
+        By solving that system for Ax and Az we obtain:
+
+        Az = (Cy - k - Ay * cos(a)) / m
+        Ax = (Cx + Az * sin(b)) / cos(b)
+
+        with:
+
+        k = Cx * sin(a) * tan(b)
+        m = sin(b) * tan(b) * sin(a) + sin(a) * cos(b)
+
+       */
+
+      var b = lightbot.IsometricProjection.verticalRotationAngle * Math.PI/180; // vertical rotation angle in radians
+      var a = lightbot.IsometricProjection.horizontalRotationAngle * Math.PI/180; // horizontal rotation angle in radians
+
+      var y = lightbot.Box().edgeLength * lightbot.Box().heightScale; // Ay is the fixed minimal height of a box
+
+      var k = tmpX * Math.sin(a) * Math.tan(b);
+      var m = Math.sin(a) * (Math.sin(b) * Math.tan(b) +  Math.cos(b));
+
+      var z = (tmpY - k - y * Math.cos(a)) / m;
+      var x = (tmpX + z * Math.sin(b)) / Math.cos(b);
 
       x = Math.floor(x / 50);
       z = Math.floor(z / 50);
@@ -208,10 +238,6 @@ var lightbot = (function() {
        Math: http://en.wikipedia.org/wiki/Isometric_projection#Overview
        More Theory: http://www.compuphase.com/axometr.htm
        Angles used: vertical rotation=45°, horizontal rotation=arctan(0,5)
-       projection matrix:
-       | 0,707  0     -0,707 |
-       | 0,321  0,891  0,321 |
-       | 0,630 -0,453  0,630 |
 
        Additional offset!
        Y Axis is inverted.
